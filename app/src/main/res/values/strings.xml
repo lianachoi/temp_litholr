@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Chord</string>
-    <string name="kakao_app_key">08c2f98db4514d6d5c76353eb11dd741</string>
+    <string name="kakao_app_key"><API KEY 입력></string>
 </resources>
