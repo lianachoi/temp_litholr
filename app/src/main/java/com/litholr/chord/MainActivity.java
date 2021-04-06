@@ -1,13 +1,11 @@
 package com.litholr.chord;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -18,26 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.kakao.auth.AuthType;
-import com.kakao.auth.ISessionCallback;
-import com.kakao.auth.Session;
-import com.kakao.network.ErrorResult;
-import com.kakao.usermgmt.UserManagement;
-import com.kakao.usermgmt.callback.LogoutResponseCallback;
-import com.kakao.usermgmt.callback.MeV2ResponseCallback;
-import com.kakao.usermgmt.response.MeV2Response;
-import com.kakao.usermgmt.response.model.Profile;
-import com.kakao.usermgmt.response.model.UserAccount;
-import com.kakao.util.OptionalBoolean;
-import com.kakao.util.exception.KakaoException;
-
 import java.io.IOException;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static Context mContext;
-    Button btnStartRecord, btnStopRecord, btnStartPlay, btnStopPlay;
+    Button btnStartRecord, btnStopRecord, btnStartPlay, btnStopPlay, btnLogin;
     String pathSave = "";
 
     MediaRecorder mediaRecorder;
@@ -45,10 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
     final int REQUEST_PERMISSION_CODE = 1000;
 
-    private Button btn_custom_login;
-    private Button btn_custom_login_out;
-    private SessionCallback sessionCallback = new SessionCallback();
-    Session session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,22 +38,13 @@ public class MainActivity extends AppCompatActivity {
         if (!checkPermissionFromDevice())
             requestPermission();
 
-        mContext = getApplicationContext();
         btnStartPlay = (Button) findViewById(R.id.btnStartPlay);
         btnStartRecord = (Button) findViewById(R.id.btnStartRecord);
         btnStopPlay = (Button) findViewById(R.id.btnStopPlay);
         btnStopRecord = (Button) findViewById(R.id.btnStopRecord);
 
-        btn_custom_login = (Button) findViewById(R.id.btn_custom_login);
-        btn_custom_login_out = (Button) findViewById(R.id.btn_custom_login_out);
 
-        session = Session.getCurrentSession();
-
-//        Intent intent = new Intent(this, SessionCallback.class);
-//        intent.putExtra("nickname", "");
-//        startActivity(intent);
-
-        session.addCallback(sessionCallback);
+        btnLogin = (Button) findViewById(R.id.btnLogin);
 
         btnStartRecord.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,26 +116,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btn_custom_login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                session.open(AuthType.KAKAO_LOGIN_ALL, MainActivity.this);
-
-            }
-        });
-
-        btn_custom_login_out.setOnClickListener(new View.OnClickListener() {
+        btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
-                UserManagement.getInstance()
-                        .requestLogout(new LogoutResponseCallback() {
-
-                            @Override
-                            public void onCompleteLogout() {
-                                Toast.makeText(MainActivity.this, "로그아웃 되었습니다.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivityForResult(intent,0);
             }
         });
     }
@@ -206,23 +162,10 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // 세션 콜백 삭제
-        Session.getCurrentSession().removeCallback(sessionCallback);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-
-        // 카카오톡|스토리 간편로그인 실행 결과를 받아서 SDK로 전달
-        if (Session.getCurrentSession().handleActivityResult(requestCode, resultCode, data)) {
-            return;
-        }
-
         super.onActivityResult(requestCode, resultCode, data);
+        Toast.makeText(this, data.getStringExtra("nickname"), Toast.LENGTH_SHORT).show();
     }
 }
 
