@@ -1,6 +1,7 @@
 package com.litholr.chord;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -35,6 +36,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static Context mContext;
     Button btnStartRecord, btnStopRecord, btnStartPlay, btnStopPlay;
     String pathSave = "";
 
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         if (!checkPermissionFromDevice())
             requestPermission();
 
+        mContext = getApplicationContext();
         btnStartPlay = (Button) findViewById(R.id.btnStartPlay);
         btnStartRecord = (Button) findViewById(R.id.btnStartRecord);
         btnStopPlay = (Button) findViewById(R.id.btnStopPlay);
