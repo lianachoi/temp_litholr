@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -16,12 +17,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnStartRecord, btnStopRecord, btnStartPlay, btnStopPlay, btnLogin;
+    Button btnStartRecord, btnStopRecord, btnStartPlay, btnStopPlay, btnLogin, btnSeeList;
     String pathSave = "";
 
     MediaRecorder mediaRecorder;
@@ -46,11 +47,17 @@ public class MainActivity extends AppCompatActivity {
 
         btnLogin = (Button) findViewById(R.id.btnLogin);
 
+
+        btnSeeList = (Button) findViewById(R.id.btnSeeList);
+
         btnStartRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pathSave = getFilesDir() + "/"
-                        + UUID.randomUUID().toString() + "_audio_record.3gp";
+//                pathSave = getFilesDir() + "/"
+//                        + UUID.randomUUID().toString() + "_audio_record.mp3";
+                pathSave = Environment.getExternalStorageDirectory()
+                        .getAbsolutePath()
+                        + "/Documents/Chord/Audio/audio_record.mp3";
                 setupMediaRecorder();
                 try {
                     mediaRecorder.prepare();
@@ -70,7 +77,13 @@ public class MainActivity extends AppCompatActivity {
         btnStopRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mediaRecorder.stop();
+                try {
+                    mediaRecorder.stop();
+                } catch (IllegalStateException ise){
+                    ise.printStackTrace();
+                }
+                mediaRecorder.release();
+                mediaRecorder = null;
                 btnStopRecord.setEnabled(false);
                 btnStartPlay.setEnabled(true);
                 btnStartRecord.setEnabled(true);
@@ -116,6 +129,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnSeeList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ListActivity.class);
+                startActivity(intent);
+            }
+        });
+
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,8 +149,13 @@ public class MainActivity extends AppCompatActivity {
     private void setupMediaRecorder() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mediaRecorder.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+        File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+                + "/Documents/Chord/Audio");
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
         mediaRecorder.setOutputFile(pathSave);
     }
 
@@ -146,7 +172,9 @@ public class MainActivity extends AppCompatActivity {
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.RECORD_AUDIO
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.INTERNET,
+                Manifest.permission.READ_EXTERNAL_STORAGE
 
         }, REQUEST_PERMISSION_CODE);
     }
